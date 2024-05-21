@@ -1,11 +1,14 @@
 let canvas;
 let ctx;
+let mainloop;
 function init() {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
+  ctx.translate(0, canvas.height);
+  ctx.scale(1, -1);
   drawbackground();
-  // setInterval(tick, 220);
-  // for (let i = 0; i < 15; i++) tick();
+  // mainloop = setInterval(tick, 20);
+  // for (let i = 0; i < 17; i++) tick();
   // tick();
   // tick();
   // tick();
@@ -26,6 +29,20 @@ function init() {
   // tick();
 }
 
+function dot(a, b) {
+  return a[0] * b[0] + a[1] * b[1];
+}
+
+function sub_v(a, b) {
+  // console.log("iwheof ", a, b);
+  return [a[0] - b[0], a[1] - b[1]];
+}
+
+function mag_cal(b) {
+  // console.log("mag_cal", Math.pow(b[0], 2), Math.pow(b[0], 2));
+  return Math.sqrt(Math.pow(b[0], 2) + Math.pow(b[1], 2));
+}
+
 function drawbackground() {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -34,13 +51,14 @@ function drawbackground() {
   //   var background = ctx.createImageData(w, h);
   //   ctx.putImageData(background, 0, 0);
 }
+
 function render() {
   for (let i = 0; i < renderer.length; i++) {
-    x = renderer[i].x;
-    y = renderer[i].y;
-    shape = renderer[i].shape;
-    color = renderer[i].color;
-    if (shape == "circle") {
+    if (renderer[i] instanceof circle_thing) {
+      x = renderer[i].x;
+      y = renderer[i].y;
+      shape = renderer[i].shape;
+      color = renderer[i].color;
       //   ctx.fillEllipse(x, y, 10, 10, 10, 10, 10);
 
       //   ctx.fillStyle = renderer[i].color;
@@ -52,7 +70,18 @@ function render() {
       ctx.arc(x, y, renderer[i].radius, 0, 2 * Math.PI);
       ctx.fillStyle = color;
       ctx.fill();
-      console.log("circle");
+      // console.log("circle");
+    } else if (renderer[i] instanceof line_thing) {
+      let line = renderer[i];
+      [x0, y0] = line.start;
+      [x1, y1] = line.end;
+      ctx.strokestyle = renderer[i].color;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+
+      // Draw the Path
+      ctx.stroke();
     }
   }
 }
@@ -77,16 +106,16 @@ function compute() {
       let accforces_y = 0;
 
       [accforces_x, accforces_y] = accforces(renderer[i]);
-      console.log("acctuator", accforces_x, accforces_y);
+      // console.log("acctuator", accforces_x, accforces_y);
       renderer[i].x += renderer[i].v[0] + 0.5 * accforces_x;
       renderer[i].y += renderer[i].v[1] + 0.5 * accforces_y;
       renderer[i].v[0] += accforces_x;
       renderer[i].v[1] += accforces_y;
     }
-    console.log(renderer[i].color, renderer[i]);
+    console.log("v ", renderer[i].color, renderer[i].v);
+    console.log("Cords ", renderer[i].color, renderer[i].x, renderer[i].y);
   }
 }
-
 function collision() {
   // pos = renderer.map((obj) => [obj.x, obj.y, obj]);
   // pos_x = pos.filter(() => true);
@@ -96,28 +125,100 @@ function collision() {
   // console.log(pos, pos_y);
 
   for (i = 0; i < renderer.length; i++) {
+    if (renderer[i] instanceof line_thing) {
+      continue;
+    }
     for (j = i; j < renderer.length; j++) {
       if (i == j) {
         continue;
       }
-      a = renderer[i];
-      b = renderer[j];
-      let d = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-      if (d < a.radius + b.radius) {
-        console.log("mill gaya", a, b);
-        // pend_d = a.radius + b.radius - d;
-        magnitude = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
-        magnitude = magnitude ? magnitude : 1;
-        console.log("magnitude", magnitude);
-        unit_n = [(a.x - b.x) / magnitude, (a.y - b.y) / magnitude];
-        console.log(unit_n);
-        v_rel = [a.v[0] - b.v[0], a.v[1] - b.v[1]];
-        v_rel_dot_n = v_rel[0] * unit_n[0] + v_rel[1] * unit_n[1];
-        elasticity = 0.05;
-        impulse = (-(1 + elasticity) * v_rel_dot_n) / (1 / a.mass + 1 / b.mass);
-        console.log("Impulse", impulse);
-        a.apply_force([impulse * unit_n[0], impulse * unit_n[1]]);
-        b.apply_force([-impulse * unit_n[0], -impulse * unit_n[1]]);
+
+      if (renderer[j] instanceof line_thing) {
+        let ball = renderer[i];
+        let line = renderer[j];
+        [x0, y0] = line.start;
+        [x1, y1] = line.end;
+        [xc, yc] = [ball.x, ball.y];
+        // let a = y1 - y0;
+        // let b = x0 - x1;
+        // let c = (x1 - x0) * y0 - (y1 - y0) * x0;
+        // let perpend_d =
+        //   Math.abs(a * x0 + b * y0 + c) / Math.sqrt(a * a + b * b);
+        // if (perpend_d < r) {
+        // }
+
+        let a = [xc - x0, yc - y0];
+        let b = [x1 - x0, y1 - y0];
+        // let mag = dot(a, b);
+        let a_b = dot(a, b);
+        let b_mag = mag_cal(b);
+        let a_proj_b = [a_b[0] / b_mag, a_b[1] / b_mag];
+        let c = sub_v(a, a_proj_b);
+        let c_mag = mag_cal(c);
+        if (c_mag < ball.radius) {
+          //push out
+          let c_scale = [ball.radius + c[0], ball.radius + c[1]];
+          ball.x = ball.x - c_scale[0];
+          ball.y = ball.y - c_scale[1];
+          //change velocity
+          // v = ball.v;
+          // c = [-c[0], -c[1]];
+          // //project v on c and v on b for mags only then set as velocity vec
+          // let v_c = dot(v, c);
+          // let v_b = dot(v, b);
+          // ball.v[0] = -v_c;
+          // ball.v[1] = v_b;
+        }
+      } else if (renderer[j] instanceof circle_thing) {
+        a = renderer[i];
+        b = renderer[j];
+        let n = sub_v([a.x, a.y], [b.x, b.y]);
+        let n_ = mag_cal(n);
+        n_ = n_ ? n_ : 1000;
+
+        if (n_ <= a.radius + b.radius) {
+          console.log("mill gaya", a, b);
+          console.log("n_", n_);
+          console.log("n", n);
+
+          pend_d = a.radius + b.radius - n_;
+          unit_n = [n[0] / n_, n[1] / n_];
+          // n = [a.v[0] - b.v[0], a.v[1] - b.v[1]];
+          va = a.v;
+          vb = b.v;
+          ma = a.mass;
+          mb = b.mass;
+          let fa = ((2 * mb) / (ma + mb)) * (dot(sub_v(va, vb), n) / (n_ * n_));
+          let fb =
+            ((2 * ma) / (ma + mb)) *
+            (dot(sub_v(vb, va), [-1 * n[0], -1 * n[1]]) / (n_ * n_));
+          new_va = sub_v(va, [fa * n[0], fa * n[1]]);
+          new_vb = sub_v(vb, [fb * -1 * n[0], fb * -1 * n[1]]);
+          console.log("NEWWWWSSSS", new_va, new_vb);
+          // v_a = a.v[0] - (2 * a.mass) / (a.mass + b.mass);
+          // v_rel_dot_n = v_rel[0] * unit_n[0] + v_rel[1] * unit_n[1];
+          // elasticity = 0.5;
+          // impulse =
+          //   (-(1 + elasticity) * v_rel_dot_n) / (1 / a.mass + 1 / b.mass);
+          // console.log("Impulse", impulse);
+          console.log("unint_n and pend_d", unit_n, pend_d);
+          console.log([
+            a.x + (unit_n[0] * pend_d) / 2,
+            a.y + (unit_n[1] * pend_d) / 2,
+          ]);
+          a.set_cords([
+            a.x + (unit_n[0] * pend_d) / 2,
+            a.y + (unit_n[1] * pend_d) / 2,
+          ]);
+          b.set_cords([
+            b.x - (unit_n[0] * pend_d) / 2,
+            b.y - (unit_n[1] * pend_d) / 2,
+          ]);
+          a.set_v(new_va);
+          b.set_v(new_vb);
+          // a.apply_force([impulse * unit_n[0], impulse * unit_n[1]]);
+          // b.apply_force([-impulse * unit_n[0], -impulse * unit_n[1]]);
+        }
       }
     }
   }
@@ -138,12 +239,11 @@ function collision() {
   // }
 }
 
-class thing {
-  constructor(x, y, radius, shape, color, v, forces, gravity) {
+class circle_thing {
+  constructor(x, y, radius, color, v, forces, gravity) {
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.shape = shape;
     this.color = color;
     this.mass = 2 * Math.PI * (radius * radius);
     this.v = v;
@@ -152,17 +252,31 @@ class thing {
       this.forces.push([0, -9.8 * this.mass]);
     }
   }
-  add_v(x, y) {
-    this.v[0] += x;
-    this.v[1] += y;
+  set_v(x) {
+    this.v[0] = x[0];
+    this.v[1] = x[1];
   }
   apply_force(force) {
     // compute new vs
-    console.log(force);
+    // console.log(force);
     this.v[0] += force[0] / this.mass;
     this.v[1] += force[1] / this.mass;
   }
+  set_cords(cords) {
+    console.log("set cords ", cords);
+    this.x = cords[0];
+    this.y = cords[1];
+  }
 }
+
+class line_thing {
+  constructor(start, end, color) {
+    this.start = start;
+    this.end = end;
+    this.color = color;
+  }
+}
+
 function tick() {
   compute();
   collision();
@@ -171,8 +285,24 @@ function tick() {
   render();
 }
 let renderer = [];
-ball = new thing(100, 250, 10, "circle", "red", [-10, 0], [], true);
-ball1 = new thing(200, 250, 50, "circle", "blue", [10, 0], [], true);
-ball2 = new thing(600, 250, 50, "circle", "green", [-10, 0], [], false);
-// ball3 = new thing(400, 250, 10, "circle", "white", [10, 0], [], false);
-renderer.push(ball, ball1, ball2);
+// ball = new thing(100, 250, 10, "circle", "red", [-10, 0], [], false);
+let ball1 = new circle_thing(500, 250, 10, "blue", [20, 0], [], true);
+let ball2 = new circle_thing(600, 250, 20, "green", [-20, 0], [], true);
+let ball3 = new circle_thing(600, 150, 60, "red", [0, 0], [], false);
+let ball4 = new circle_thing(500, 350, 20, "yellow", [-40, 5], [], true);
+let ball5 = new circle_thing(400, 100, 15, "purple", [3, 7], [], true);
+let ball6 = new circle_thing(250, 400, 15, "orange", [-7, 3], [], true);
+let ball7 = new circle_thing(550, 200, 10, "pink", [6, -6], [], true);
+let ball8 = new circle_thing(350, 300, 10, "cyan", [-6, 6], [], true);
+let line1 = new line_thing([0, 0], [1000, 0], "white");
+
+renderer.push(ball1, ball2);
+renderer.push(ball3);
+renderer.push(line1);
+window.addEventListener("keydown", (e) => {
+  // console.log(e);
+  if (e.key == " ") {
+    clearInterval(mainloop);
+    tick();
+  }
+});
