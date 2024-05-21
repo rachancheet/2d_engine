@@ -1,17 +1,61 @@
 let canvas;
 let ctx;
 let mainloop;
+let renderer = [];
+delta_t = 0.1;
+tick_rate = 10;
+
 function init() {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
   ctx.translate(0, canvas.height);
   ctx.scale(1, -1);
   drawbackground();
-  // mainloop = setInterval(tick, 20);
+
+  // ball = new thing(100, 250, 10, "circle", "red", [-10, 0], [], false);
+  let ball1 = new circle_thing(500, 250, 30, "blue", [20, 0], [], true);
+  let ball2 = new circle_thing(600, 250, 40, "green", [-20, 0], [], true);
+  let ball3 = new circle_thing(600, 250, 60, "red", [0, 0], [], true);
+  let ball4 = new circle_thing(500, 350, 20, "yellow", [-40, 5], [], true);
+  let ball5 = new circle_thing(400, 100, 15, "purple", [3, 7], [], true);
+  let ball6 = new circle_thing(250, 400, 15, "orange", [-7, 3], [], true);
+  let ball7 = new circle_thing(550, 200, 10, "pink", [6, -6], [], true);
+  let ball8 = new circle_thing(350, 300, 10, "cyan", [-6, 6], [], true);
+
+  let width = canvas.width;
+  let height = canvas.height;
+  let d = 10;
+
+  let line1 = new line_thing([d, d], [width - d, d], "white");
+  let line2 = new line_thing([d, d], [d, height - d], "white");
+  let line3 = new line_thing([d, height - d], [width - d, height - d], "white");
+  let line4 = new line_thing([width - d, height - d], [width - d, d], "white");
+  let line5 = new line_thing(
+    [width / 2, height / 2 - 200],
+    [width / 2, height / 2 + 200],
+    "white"
+  );
+
+  renderer.push(ball1, ball2);
+  renderer.push(ball3);
+  renderer.push(ball4);
+  renderer.push(ball5);
+  renderer.push(ball6);
+  renderer.push(ball7);
+  renderer.push(ball8);
+  renderer.push(line1);
+  renderer.push(line2);
+  renderer.push(line3);
+  renderer.push(line4);
+  renderer.push(line5);
+
+  mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
   // for (let i = 0; i < 17; i++) tick();
-  tick();
-  tick();
-  tick();
+  // tick();
+  // tick();
+  // tick();
   // tick();
   // tick();
   // tick();
@@ -36,6 +80,9 @@ function dot_v(a, b) {
   return [a[0] * b[0], a[1] * b[1]];
 }
 
+function mul_s_v(a, b) {
+  return [a[0] * b, a[1] * b];
+}
 function sub_v(a, b) {
   // console.log("iwheof ", a, b);
   return [a[0] - b[0], a[1] - b[1]];
@@ -106,21 +153,23 @@ function accforces(obj) {
 function compute() {
   for (let i = 0; i < renderer.length; i++) {
     if (
-      !(renderer[i] instanceof line_thing) &&
-      0 < renderer[i].y &&
-      renderer[i].y < canvas.height &&
-      0 < renderer[i].x &&
-      renderer[i].x < canvas.width
+      !(renderer[i] instanceof line_thing)
+      // 0 < renderer[i].y &&
+      // renderer[i].y < canvas.height &&
+      // 0 < renderer[i].x &&
+      // renderer[i].x < canvas.width
     ) {
       let accforces_x = 0;
       let accforces_y = 0;
 
       [accforces_x, accforces_y] = accforces(renderer[i]);
       // console.log("acctuator", accforces_x, accforces_y);
-      renderer[i].x += renderer[i].v[0] + 0.5 * accforces_x;
-      renderer[i].y += renderer[i].v[1] + 0.5 * accforces_y;
-      renderer[i].v[0] += accforces_x;
-      renderer[i].v[1] += accforces_y;
+      renderer[i].x +=
+        renderer[i].v[0] * delta_t + 0.5 * accforces_x * delta_t * delta_t;
+      renderer[i].y +=
+        renderer[i].v[1] * delta_t + 0.5 * accforces_y * delta_t * delta_t;
+      renderer[i].v[0] += accforces_x * delta_t;
+      renderer[i].v[1] += accforces_y * delta_t;
     }
     // console.log("v ", renderer[i].color, renderer[i].v);
     // console.log("Cords ", renderer[i].color, renderer[i].x, renderer[i].y);
@@ -194,8 +243,9 @@ function collision() {
           v = ball.v;
           // c = [-c[0], -c[1]];
           //project v on c and v on b for mags only then set as velocity vec
-          let v_c = dot_v(v, c);
-          let v_proj_c = [v_c[0] / c_mag, v_c[1] / c_mag];
+          let v_c = dot(v, c);
+          let unit_c = [c[0] / c_mag, c[1] / c_mag];
+          let v_proj_c = [(unit_c[0] * v_c) / c_mag, (unit_c[1] * v_c) / c_mag];
           let new_v = [v[0] - 2 * v_proj_c[0], v[1] - 2 * v_proj_c[1]];
           // let unit_c = [c[0]/c_mag, c[1]/c_mag]
           // let jk = [unit_c[0]]
@@ -326,25 +376,11 @@ class line_thing {
 
 function tick() {
   compute();
-  render();
   collision();
+  render();
   //   img = makeimage();
 }
-let renderer = [];
-// ball = new thing(100, 250, 10, "circle", "red", [-10, 0], [], false);
-let ball1 = new circle_thing(500, 250, 10, "blue", [20, 0], [], true);
-let ball2 = new circle_thing(600, 250, 20, "green", [-20, 0], [], true);
-let ball3 = new circle_thing(600, 250, 60, "red", [0, 0], [], true);
-let ball4 = new circle_thing(500, 350, 20, "yellow", [-40, 5], [], true);
-let ball5 = new circle_thing(400, 100, 15, "purple", [3, 7], [], true);
-let ball6 = new circle_thing(250, 400, 15, "orange", [-7, 3], [], true);
-let ball7 = new circle_thing(550, 200, 10, "pink", [6, -6], [], true);
-let ball8 = new circle_thing(350, 300, 10, "cyan", [-6, 6], [], true);
-let line1 = new line_thing([200, 100], [800, 10], "white");
 
-// renderer.push(ball1, ball2);
-renderer.push(ball3);
-renderer.push(line1);
 window.addEventListener("keydown", (e) => {
   // console.log(e);
   if (e.key == " ") {
