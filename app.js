@@ -9,9 +9,9 @@ function init() {
   drawbackground();
   // mainloop = setInterval(tick, 20);
   // for (let i = 0; i < 17; i++) tick();
-  // tick();
-  // tick();
-  // tick();
+  tick();
+  tick();
+  tick();
   // tick();
   // tick();
   // tick();
@@ -32,10 +32,17 @@ function init() {
 function dot(a, b) {
   return a[0] * b[0] + a[1] * b[1];
 }
+function dot_v(a, b) {
+  return [a[0] * b[0], a[1] * b[1]];
+}
 
 function sub_v(a, b) {
   // console.log("iwheof ", a, b);
   return [a[0] - b[0], a[1] - b[1]];
+}
+function add_v(a, b) {
+  // console.log("iwheof ", a, b);
+  return [a[0] + b[0], a[1] + b[1]];
 }
 
 function mag_cal(b) {
@@ -53,6 +60,7 @@ function drawbackground() {
 }
 
 function render() {
+  drawbackground();
   for (let i = 0; i < renderer.length; i++) {
     if (renderer[i] instanceof circle_thing) {
       x = renderer[i].x;
@@ -72,10 +80,11 @@ function render() {
       ctx.fill();
       // console.log("circle");
     } else if (renderer[i] instanceof line_thing) {
+      // console.log("line rendering");
       let line = renderer[i];
       [x0, y0] = line.start;
       [x1, y1] = line.end;
-      ctx.strokestyle = renderer[i].color;
+      ctx.strokeStyle = renderer[i].color;
       ctx.beginPath();
       ctx.moveTo(x0, y0);
       ctx.lineTo(x1, y1);
@@ -97,6 +106,7 @@ function accforces(obj) {
 function compute() {
   for (let i = 0; i < renderer.length; i++) {
     if (
+      !(renderer[i] instanceof line_thing) &&
       0 < renderer[i].y &&
       renderer[i].y < canvas.height &&
       0 < renderer[i].x &&
@@ -112,9 +122,18 @@ function compute() {
       renderer[i].v[0] += accforces_x;
       renderer[i].v[1] += accforces_y;
     }
-    console.log("v ", renderer[i].color, renderer[i].v);
-    console.log("Cords ", renderer[i].color, renderer[i].x, renderer[i].y);
+    // console.log("v ", renderer[i].color, renderer[i].v);
+    // console.log("Cords ", renderer[i].color, renderer[i].x, renderer[i].y);
   }
+}
+function plot_vector(a, b, color) {
+  ctx.strokeStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(a[0], a[1]);
+  ctx.lineTo(a[0] + b[0], a[1] + b[1]);
+
+  // Draw the Path
+  ctx.stroke();
 }
 function collision() {
   // pos = renderer.map((obj) => [obj.x, obj.y, obj]);
@@ -149,25 +168,52 @@ function collision() {
 
         let a = [xc - x0, yc - y0];
         let b = [x1 - x0, y1 - y0];
-        // let mag = dot(a, b);
         let a_b = dot(a, b);
         let b_mag = mag_cal(b);
-        let a_proj_b = [a_b[0] / b_mag, a_b[1] / b_mag];
+        let unit_b = [b[0] / b_mag, b[1] / b_mag];
+        console.log(unit_b);
+        let a_proj_b = [(unit_b[0] * a_b) / b_mag, (unit_b[1] * a_b) / b_mag];
         let c = sub_v(a, a_proj_b);
         let c_mag = mag_cal(c);
-        if (c_mag < ball.radius) {
+        if (c_mag <= ball.radius) {
+          console.log("line collision");
+          plot_vector(line.start, a, "green");
+          plot_vector(line.start, a_proj_b, "green");
+          plot_vector(add_v(line.start, a_proj_b), c, "pink");
+          // plot_vector(line.start, [108 * unit_b[0], 108 * unit_b[1]], "pink");
           //push out
-          let c_scale = [ball.radius + c[0], ball.radius + c[1]];
-          ball.x = ball.x - c_scale[0];
-          ball.y = ball.y - c_scale[1];
+          let r = ball.radius;
+          let c_scale = [
+            ((r - c_mag) * c[0]) / c_mag,
+            ((r - c_mag) * c[1]) / c_mag,
+          ];
+          ball.x = ball.x + c_scale[0];
+          ball.y = ball.y + c_scale[1];
+
           //change velocity
-          // v = ball.v;
+          v = ball.v;
           // c = [-c[0], -c[1]];
-          // //project v on c and v on b for mags only then set as velocity vec
-          // let v_c = dot(v, c);
-          // let v_b = dot(v, b);
+          //project v on c and v on b for mags only then set as velocity vec
+          let v_c = dot_v(v, c);
+          let v_proj_c = [v_c[0] / c_mag, v_c[1] / c_mag];
+          let new_v = [v[0] - 2 * v_proj_c[0], v[1] - 2 * v_proj_c[1]];
+          // let unit_c = [c[0]/c_mag, c[1]/c_mag]
+          // let jk = [unit_c[0]]
+          new_v = [new_v[0], new_v[1]];
+          ball.set_v(new_v);
           // ball.v[0] = -v_c;
           // ball.v[1] = v_b;
+          console.log(
+            " a_b, b_mag, a_proj_b, c, c_mag",
+            a_b,
+            b_mag,
+            a_proj_b,
+            c,
+            c_mag,
+            c_scale,
+            new_v,
+            ball
+          );
         }
       } else if (renderer[j] instanceof circle_thing) {
         a = renderer[i];
@@ -177,9 +223,10 @@ function collision() {
         n_ = n_ ? n_ : 1000;
 
         if (n_ <= a.radius + b.radius) {
-          console.log("mill gaya", a, b);
-          console.log("n_", n_);
-          console.log("n", n);
+          console.log("circle collision");
+          // console.log("mill gaya", a, b);
+          // console.log("n_", n_);
+          // console.log("n", n);
 
           pend_d = a.radius + b.radius - n_;
           unit_n = [n[0] / n_, n[1] / n_];
@@ -201,11 +248,11 @@ function collision() {
           // impulse =
           //   (-(1 + elasticity) * v_rel_dot_n) / (1 / a.mass + 1 / b.mass);
           // console.log("Impulse", impulse);
-          console.log("unint_n and pend_d", unit_n, pend_d);
-          console.log([
-            a.x + (unit_n[0] * pend_d) / 2,
-            a.y + (unit_n[1] * pend_d) / 2,
-          ]);
+          // console.log("unint_n and pend_d", unit_n, pend_d);
+          // console.log([
+          //   a.x + (unit_n[0] * pend_d) / 2,
+          //   a.y + (unit_n[1] * pend_d) / 2,
+          // ]);
           a.set_cords([
             a.x + (unit_n[0] * pend_d) / 2,
             a.y + (unit_n[1] * pend_d) / 2,
@@ -263,7 +310,7 @@ class circle_thing {
     this.v[1] += force[1] / this.mass;
   }
   set_cords(cords) {
-    console.log("set cords ", cords);
+    // console.log("set cords ", cords);
     this.x = cords[0];
     this.y = cords[1];
   }
@@ -279,24 +326,23 @@ class line_thing {
 
 function tick() {
   compute();
-  collision();
-  drawbackground();
-  //   img = makeimage();
   render();
+  collision();
+  //   img = makeimage();
 }
 let renderer = [];
 // ball = new thing(100, 250, 10, "circle", "red", [-10, 0], [], false);
 let ball1 = new circle_thing(500, 250, 10, "blue", [20, 0], [], true);
 let ball2 = new circle_thing(600, 250, 20, "green", [-20, 0], [], true);
-let ball3 = new circle_thing(600, 150, 60, "red", [0, 0], [], false);
+let ball3 = new circle_thing(600, 250, 60, "red", [0, 0], [], true);
 let ball4 = new circle_thing(500, 350, 20, "yellow", [-40, 5], [], true);
 let ball5 = new circle_thing(400, 100, 15, "purple", [3, 7], [], true);
 let ball6 = new circle_thing(250, 400, 15, "orange", [-7, 3], [], true);
 let ball7 = new circle_thing(550, 200, 10, "pink", [6, -6], [], true);
 let ball8 = new circle_thing(350, 300, 10, "cyan", [-6, 6], [], true);
-let line1 = new line_thing([0, 0], [1000, 0], "white");
+let line1 = new line_thing([200, 100], [800, 10], "white");
 
-renderer.push(ball1, ball2);
+// renderer.push(ball1, ball2);
 renderer.push(ball3);
 renderer.push(line1);
 window.addEventListener("keydown", (e) => {
