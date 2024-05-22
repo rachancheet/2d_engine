@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>2D Ball Collision Physics Simulator</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<script type="application/javascript" src="event_handlers.js">
+</script>
+<script type="application/javascript" src="helper_functions.js">
+</script>
+<script type="application/javascript" src="line_thing.js">
+</script>
+<script type="application/javascript" src="circle_thing.js"> </script>
+<script type="application/javascript" src="grid.js"> </script>
+<script type="application/javascript" src="./app.js"></script>
+<script type="application/javascript" src="./draw.js"> </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+	integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+	crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox */
+	/* input[type=number] {
+		-moz-appearance: textfield;
+	}
+	*/
+</style>
+
+<body onload="init()" class="bg-gray-100 flex items-center justify-center min-h-screen">
+	<div class="container mx-auto p-4 bg-white rounded shadow-lg flex">
+		<div class="">
+			<h1 class="text-2xl font-bold mb-4">2D Ball Collision Physics Simulator</h1>
+			<div class="mb-4">
+				<canvas id="canvas" width="1000" height="800" class="border"></canvas>
+			</div>
+			<div class="flex flex-col space-y-4 mb-4">
+				<div class="flex flex-row">
+					<button id="add-ball" class="p-2 bg-green-500  text-white rounded">
+						Start
+					</button>
+					<button id="add-ball" class="ml-10 p-2 bg-red-500  text-white rounded">
+						Stop
+					</button>
+
+				</div>
+			</div>
+		</div>
+		<div class="flex flex-col mb-10  w-1/2 ml-10">
+			<div class="flex flex-col h-[25rem] ">
+				<h2 class="text-xl font-bold mb-4">Elements</h2>
+				<ul id="elements-list" class="space-y-2  overflow-y-scroll">
+					<!-- List items will be dynamically added here -->
+					sakldfjasl
+				</ul>
+			</div>
+
+
+			<!-- BALL  -->
+			<div class="flex flex-row w-full mb-5  ">
+				<div class="p-4 bg-white w-3/4 rounded shadow-lg">
+					<h1 class="text-2xl font-bold mb-4">Ball Dimensions</h1>
+					<div class="flex flex-col space-y-2">
+						<label for="vector-input" class="font-medium text-xl">Enter Inintial Position:</label>
+						<div class="flex items-center space-x-2">
+							<span class="text-xl">(</span>
+							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
+							<span class="text-xl">,</span>
+							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
+							<span class="text-xl">)</span>
+						</div>
+						<div class="flex flex-col">
+							<label for="ball-color" class="font-medium">Ball Color</label>
+							<input type="color" id="ball-color" class="p-2 border rounded">
+						</div>
+						<div class="flex flex-col">
+							<label for="ball-radius" class="font-medium">Ball Radius</label>
+							<input type="number" required id="ball-radius" class="p-2 border rounded w-48">
+						</div>
+
+						<label for="vector-input" class="font-medium text-xl">Enter Inintial Velocity:</label>
+						<div class="flex items-center mb-9 space-x-2">
+							<span class="text-xl">(</span>
+							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
+							<span class="text-xl">,</span>
+							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
+							<span class="text-xl">)</span>
+						</div>
+
+						<div class="flex flex-row mt-10 items-center align-items space-x-0">
+							<label for="vector-input" class="font-medium text-xl">Gravity :</label>
+							<input type="checkbox" id="vector-y" class="pt-10 align-items border rounded w-10"
+								placeholder="Y">
+
+						</div>
+					</div>
+
+				</div>
+				<div>
+					<button id="add-ball" class="p-5 bg-green-500 h-full text-white rounded">
+						<i class="fa-solid fa-circle-plus fa-2xl"></i>
+					</button>
+				</div>
+			</div>
+
+
+			<!-- BALL  -->
+			<div class="flex flex-row w-full mb-5 ">
+				<div class="p-4 bg-white w-3/4 rounded shadow-lg">
+					<h1 class="text-2xl font-bold mb-4">Line Dimensions</h1>
+					<div class="flex flex-col space-y-2">
+						<label for="vector-input" class="font-medium text-xl">Enter Start Position:</label>
+						<div class="flex items-center space-x-2">
+							<span class="text-xl">(</span>
+							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
+							<span class="text-xl">,</span>
+							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
+							<span class="text-xl">)</span>
+						</div>
+						<label for="vector-input" class="font-medium text-xl">Enter End Position:</label>
+						<div class="flex items-center space-x-2">
+							<span class="text-xl">(</span>
+							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
+							<span class="text-xl">,</span>
+							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
+							<span class="text-xl">)</span>
+						</div>
+						<div class="flex flex-col">
+							<label for="ball-color" class="font-medium">Line Color</label>
+							<input type="color" id="ball-color" class="p-2 border rounded">
+						</div>
+					</div>
+
+				</div>
+				<div>
+					<button id="add-ball" class="p-5 bg-green-500 h-full text-white rounded">
+						<i class="fa-solid fa-circle-plus fa-2xl"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+		const elementsList = document.getElementById('elements-list');
+
+		function createElementItem(type, attributes, index) {
+			const item = document.createElement('li');
+			item.className = 'p-2 border rounded flex justify-between items-center';
+			item.innerHTML = `
+                <div>
+                    <span class="font-bold">${type}</span>: ${attributes}
+                </div>
+                <button class="delete-element p-2 bg-red-500 text-white rounded" data-index="${index}">Delete</button>
+            `;
+			return item;
+		}
+
+		document.getElementById('add-line').addEventListener('click', () => {
+			const startX = document.getElementById('line-start-x').value;
+			const startY = document.getElementById('line-start-y').value;
+			const endX = document.getElementById('line-end-x').value;
+			const endY = document.getElementById('line-end-y').value;
+			const color = document.getElementById('line-color').value;
+			const attributes = `(${startX}, ${startY}) to (${endX}, ${endY}), Color: ${color}`;
+			const index = elementsList.children.length;
+			// new line_thing([star, d], [width - d, d], "white");
+
+			const item = createElementItem('Line', attributes, index);
+			elementsList.appendChild(item);
+		});
+
+		document.getElementById('add-ball').addEventListener('click', () => {
+			const radius = document.getElementById('ball-radius').value;
+			const color = document.getElementById('ball-color').value;
+			const startX = document.getElementById('ball-start-x').value;
+			const startY = document.getElementById('ball-start-y').value;
+			const attributes = `Radius: ${radius}, Color: ${color}, Position: (${startX}, ${startY})`;
+			const index = elementsList.children.length;
+			new circle_thing(startX, startY, radius, color, [-6, 6], [], true);
+
+			const item = createElementItem('Ball', attributes, index);
+			elementsList.appendChild(item);
+		});
+
+		elementsList.addEventListener('click', (event) => {
+			if (event.target.classList.contains('delete-element')) {
+				const index = event.target.getAttribute('data-index');
+				elementsList.removeChild(elementsList.children[index]);
+			}
+		});
+	</script>
+</body>
+
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>2D Ball Collision Physics Simulator</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+	<div class="container mx-auto p-4 bg-white rounded shadow-lg">
+		<h1 class="text-2xl font-bold mb-4">2D Ball Collision Physics Simulator</h1>
+		<div class="mb-4">
+			<canvas id="simulationCanvas" width="800" height="600" class="border"></canvas>
+		</div>
+		<div class="flex flex-col space-y-4 mb-4">
+			<div class="flex space-x-4">
+				<div class="flex flex-col">
+					<label for="line-start-x" class="font-medium">Line Start X</label>
+					<input type="number" id="line-start-x" class="p-2 border rounded">
+				</div>
+				<div class="flex flex-col">
+					<label for="line-start-y" class="font-medium">Line Start Y</label>
+					<input type="number" id="line-start-y" class="p-2 border rounded">
+				</div>
+				<div class="flex flex-col">
+					<label for="line-end-x" class="font-medium">Line End X</label>
+					<input type="number" id="line-end-x" class="p-2 border rounded">
+				</div>
+				<div class="flex flex-col">
+					<label for="line-end-y" class="font-medium">Line End Y</label>
+					<input type="number" id="line-end-y" class="p-2 border rounded">
+				</div>
+				<div class="flex flex-col">
+					<label for="line-color" class="font-medium">Line Color</label>
+					<input type="color" id="line-color" class="p-2 border rounded">
+				</div>
+				<button id="add-line" class="p-2 bg-blue-500 text-white rounded">Add Line</button>
+			</div>
+			<div class="flex space-x-4">
+				<div class="flex flex-col">
+					<label for="ball-radius" class="font-medium">Ball Radius</label>
+					<input type="number" id="ball-radius" class="p-2 border rounded">
+				</div>
+				<div class="flex flex-col">
+					<label for="ball-color" class="font-medium">Ball Color</label>
+					<input type="color" id="ball-color" class="p-2 border rounded">
+				</div>
+				<div class="flex flex-col">
+					<label for="ball-start-x" class="font-medium">Start X</label>
+					<input type="number" id="ball-start-x" class="p-2 border rounded">
+				</div>
+				<div class="flex flex-col">
+					<label for="ball-start-y" class="font-medium">Start Y</label>
+					<input type="number" id="ball-start-y" class="p-2 border rounded">
+				</div>
+				<button id="add-ball" class="p-2 bg-green-500 text-white rounded">Add Ball</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const canvas = document.getElementById('simulationCanvas');
+		const ctx = canvas.getContext('2d');
+
+		document.getElementById('add-line').addEventListener('click', () => {
+			const startX = parseInt(document.getElementById('line-start-x').value);
+			const startY = parseInt(document.getElementById('line-start-y').value);
+			const endX = parseInt(document.getElementById('line-end-x').value);
+			const endY = parseInt(document.getElementById('line-end-y').value);
+			const color = document.getElementById('line-color').value;
+
+			ctx.strokeStyle = color;
+			ctx.beginPath();
+			ctx.moveTo(startX, startY);
+			ctx.lineTo(endX, endY);
+			ctx.stroke();
+		});
+
+		document.getElementById('add-ball').addEventListener('click', () => {
+			const radius = parseInt(document.getElementById('ball-radius').value);
+			const color = document.getElementById('ball-color').value;
+			const startX = parseInt(document.getElementById('ball-start-x').value);
+			const startY = parseInt(document.getElementById('ball-start-y').value);
+
+			ctx.fillStyle = color;
+			ctx.beginPath();
+			ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+			ctx.fill();
+		});
+	</script>
+</body>
+
+</html> -->

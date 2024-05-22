@@ -5,8 +5,10 @@ let renderer = [];
 delta_t = 0.1;
 tick_rate = 60;
 let grid_dim = [50, 50];
-let width = window.innerWidth;
-let height = window.innerHeight;
+// let width = window.innerWidth - 40;
+// let height = window.innerHeight - 40;
+let width = 1000;
+let height = 800;
 
 // console.log(window.innerHeight);
 // const grid_c = require("grid.js");
@@ -20,16 +22,16 @@ let global_grid = new grid_c();
 function init() {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // canvas.width = window.innerWidth - 40;
+  // canvas.height = window.innerHeight - 40;
 
   ctx.translate(0, canvas.height);
   ctx.scale(1, -1);
   drawbackground();
 
-  mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
+  // mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
   // for (let i = 0; i < 17; i++) tick();
-  // tick();
+  tick();
   // tick();
 }
 
