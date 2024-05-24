@@ -3,12 +3,14 @@ let ctx;
 let mainloop;
 let renderer = [];
 delta_t = 0.1;
-tick_rate = 60;
-let grid_dim = [50, 50];
+tick_rate = 10;
+let grid_dim = [30, 30];
+let show_grid = false;
 // let width = window.innerWidth - 40;
 // let height = window.innerHeight - 40;
-let width = 1000;
-let height = 800;
+let width = 1200;
+let height = 600;
+let running = false;
 
 // console.log(window.innerHeight);
 // const grid_c = require("grid.js");
@@ -24,15 +26,19 @@ function init() {
   ctx = canvas.getContext("2d");
   // canvas.width = window.innerWidth - 40;
   // canvas.height = window.innerHeight - 40;
+  width = canvas.width;
+  height = canvas.height;
+  console.log("sodjfl", width, height);
 
   ctx.translate(0, canvas.height);
   ctx.scale(1, -1);
-  drawbackground();
+  // drawbackground();
 
   // mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
+  // clearInterval(mainloop);
   // for (let i = 0; i < 17; i++) tick();
-  tick();
   // tick();
+  tick();
 }
 
 function render() {

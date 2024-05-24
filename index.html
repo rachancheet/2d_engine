@@ -28,122 +28,167 @@
 		margin: 0;
 	}
 
+	#textBox {
+		z-index: 1000;
+	}
+
 	/* Firefox */
 	/* input[type=number] {
 		-moz-appearance: textfield;
 	}
 	*/
+	/* canvas {
+		width: 100%;
+		height: 600;
+	} */
 </style>
 
-<body onload="init()" class="bg-gray-100 flex items-center justify-center min-h-screen">
-	<div class="container mx-auto p-4 bg-white rounded shadow-lg flex">
-		<div class="">
-			<h1 class="text-2xl font-bold mb-4">2D Ball Collision Physics Simulator</h1>
-			<div class="mb-4">
-				<canvas id="canvas" width="1000" height="800" class="border"></canvas>
+<body onload="init()" class="bg-gray-100 flex p-10 items-center justify-center min-h-screen">
+	<div class="container p-4 bg-white  rounded shadow-lg flex">
+		<div class="w-full">
+			<h1 class="text-2xl font-bold mb-4">2D Ball Elastic Collision Physics Simulator</h1>
+			<div class="mb-4 w-full">
+				<canvas id="canvas" width="1200" height="600" class="border"></canvas>
 			</div>
 			<div class="flex flex-col space-y-4 mb-4">
-				<div class="flex flex-row">
-					<button id="add-ball" class="p-2 bg-green-500  text-white rounded">
-						Start
-					</button>
-					<button id="add-ball" class="ml-10 p-2 bg-red-500  text-white rounded">
-						Stop
-					</button>
+				<div class="flex flex-row ">
+					<div>
 
-				</div>
-			</div>
-		</div>
-		<div class="flex flex-col mb-10  w-1/2 ml-10">
-			<div class="flex flex-col h-[25rem] ">
-				<h2 class="text-xl font-bold mb-4">Elements</h2>
-				<ul id="elements-list" class="space-y-2  overflow-y-scroll">
-					<!-- List items will be dynamically added here -->
-					sakldfjasl
-				</ul>
-			</div>
-
-
-			<!-- BALL  -->
-			<div class="flex flex-row w-full mb-5  ">
-				<div class="p-4 bg-white w-3/4 rounded shadow-lg">
-					<h1 class="text-2xl font-bold mb-4">Ball Dimensions</h1>
-					<div class="flex flex-col space-y-2">
-						<label for="vector-input" class="font-medium text-xl">Enter Inintial Position:</label>
-						<div class="flex items-center space-x-2">
-							<span class="text-xl">(</span>
-							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
-							<span class="text-xl">,</span>
-							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
-							<span class="text-xl">)</span>
-						</div>
-						<div class="flex flex-col">
-							<label for="ball-color" class="font-medium">Ball Color</label>
-							<input type="color" id="ball-color" class="p-2 border rounded">
-						</div>
-						<div class="flex flex-col">
-							<label for="ball-radius" class="font-medium">Ball Radius</label>
-							<input type="number" required id="ball-radius" class="p-2 border rounded w-48">
-						</div>
-
-						<label for="vector-input" class="font-medium text-xl">Enter Inintial Velocity:</label>
-						<div class="flex items-center mb-9 space-x-2">
-							<span class="text-xl">(</span>
-							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
-							<span class="text-xl">,</span>
-							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
-							<span class="text-xl">)</span>
-						</div>
-
-						<div class="flex flex-row mt-10 items-center align-items space-x-0">
-							<label for="vector-input" class="font-medium text-xl">Gravity :</label>
-							<input type="checkbox" id="vector-y" class="pt-10 align-items border rounded w-10"
-								placeholder="Y">
-
-						</div>
+						<button onclick="start()" class="p-2 bg-green-500  text-white rounded">
+							Start
+						</button>
+						<button onclick="stop_()" class="ml-10 p-2 bg-red-500  text-white rounded">
+							Stop
+						</button>
+						<button onclick="step()" class="ml-10 p-2 bg-blue-500  text-white rounded">
+							Step
+							(SpaceBar)
+							<button onclick="demo()" class="ml-10 p-2 bg-blue-500  text-white rounded">
+								demo
+							</button>
+							<button onclick="pls_show_grid()" class="ml-10 p-2 bg-blue-500  text-white rounded">
+								Collision grid
+							</button>
 					</div>
 
-				</div>
-				<div>
-					<button id="add-ball" class="p-5 bg-green-500 h-full text-white rounded">
-						<i class="fa-solid fa-circle-plus fa-2xl"></i>
-					</button>
-				</div>
-			</div>
+
+					<div class="flex flex-row space-x-10 mb-10 align-items ml-10">
 
 
-			<!-- BALL  -->
-			<div class="flex flex-row w-full mb-5 ">
-				<div class="p-4 bg-white w-3/4 rounded shadow-lg">
-					<h1 class="text-2xl font-bold mb-4">Line Dimensions</h1>
-					<div class="flex flex-col space-y-2">
-						<label for="vector-input" class="font-medium text-xl">Enter Start Position:</label>
-						<div class="flex items-center space-x-2">
-							<span class="text-xl">(</span>
-							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
-							<span class="text-xl">,</span>
-							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
-							<span class="text-xl">)</span>
+						<!-- BALL  -->
+						<div>
+
+							<form onsubmit="addball(event)">
+								<div class="flex flex-row w-full mb-5  ">
+									<div class="p-8 bg-white w-full rounded shadow-lg">
+
+										<h1 class="text-2xl font-bold mb-4">Ball Dimensions</h1>
+										<div class="flex flex-col space-y-2">
+											<label for="vector-input" class="font-medium text-xl">Enter Inintial
+												Position:</label>
+											<div class="flex items-center space-x-2">
+												<span class="text-xl">(</span>
+												<input required type="number" id="x" class="p-2 border rounded w-20"
+													value="200" placeholder="X">
+												<span class="text-xl">,</span>
+												<input required type="number" id="y" class="p-2 border rounded w-20"
+													value="200" placeholder="Y">
+												<span class="text-xl">)</span>
+											</div>
+											<div class="flex flex-col">
+												<label for="ball-color" class="font-medium">Ball Color</label>
+												<input required value="#FFC0CB" type="color" id="color"
+													class="p-2 border rounded">
+											</div>
+											<div class="flex flex-col">
+												<label for="ball-radius" class="font-medium">Ball Radius</label>
+												<input value="15" required type="number" required id="radius"
+													class="p-2 border rounded w-48">
+											</div>
+
+											<label for="vector-input" class="font-medium text-xl">Enter Inintial
+												Velocity:</label>
+											<div class="flex items-center mb-9 space-x-2">
+												<span class="text-xl">(</span>
+												<input value="0" required type="number" id="vx"
+													class="p-2 border rounded w-20" placeholder="X">
+												<span class="text-xl">,</span>
+												<input value="0" required type="number" id="vy"
+													class="p-2 border rounded w-20" placeholder="Y">
+												<span class="text-xl">)</span>
+											</div>
+
+											<div class="flex flex-row mt-10 items-center align-items space-x-0">
+												<label for="vector-input" class="font-medium text-xl">Gravity :</label>
+												<input checked type="checkbox" id="gravity"
+													class="pt-10 align-items border rounded w-10">
+
+											</div>
+										</div>
+
+									</div>
+									<div class="">
+										<button id="add-ball" class="p-5 w-full bg-green-500 h-full text-white rounded">
+											<i class="fa-solid fa-circle-plus fa-2xl"></i>
+										</button>
+									</div>
+								</div>
+
+							</form>
+
 						</div>
-						<label for="vector-input" class="font-medium text-xl">Enter End Position:</label>
-						<div class="flex items-center space-x-2">
-							<span class="text-xl">(</span>
-							<input type="number" id="vector-x" class="p-2 border rounded w-20" placeholder="X">
-							<span class="text-xl">,</span>
-							<input type="number" id="vector-y" class="p-2 border rounded w-20" placeholder="Y">
-							<span class="text-xl">)</span>
+						<div>
+							<!-- BALL  -->
+							<form onsubmit="addline(event)">
+								<div class="flex flex-row w-full mb-5 ">
+									<div class="p-8 bg-white w-full rounded shadow-lg">
+										<h1 class="text-2xl font-bold mb-4">Line Dimensions</h1>
+										<div class="flex flex-col space-y-2">
+											<label for="vector-input" class="font-medium text-xl">Enter Start
+												Position:</label>
+											<div class="flex items-center space-x-2">
+												<span class="text-xl">(</span>
+												<input type="number" id="Sx" class="p-2 border rounded w-20"
+													placeholder="X">
+												<span class="text-xl">,</span>
+												<input required type="number" id="Sy" class="p-2 border rounded w-20"
+													placeholder="Y">
+												<span class="text-xl">)</span>
+											</div>
+											<label for="vector-input" class="font-medium text-xl">Enter End
+												Position:</label>
+											<div class="flex items-center space-x-2">
+												<span class="text-xl">(</span>
+												<input required type="number" id="Ex" class="p-2 border rounded w-20"
+													placeholder="X">
+												<span class="text-xl">,</span>
+												<input required type="number" id="Ey" class="p-2 border rounded w-20"
+													placeholder="Y">
+												<span class="text-xl">)</span>
+											</div>
+											<div class="flex flex-col">
+												<label for="ball-color" class="font-medium">Line Color</label>
+												<input required type="color" id="color" class="p-2 border rounded">
+											</div>
+										</div>
+
+									</div>
+									<div class="">
+										<button id="add-ball" class="w-full p-5 bg-green-500 h-full text-white rounded">
+											<i class="fa-solid fa-circle-plus fa-2xl"></i>
+										</button>
+									</div>
+								</div>
+							</form>
 						</div>
-						<div class="flex flex-col">
-							<label for="ball-color" class="font-medium">Line Color</label>
-							<input type="color" id="ball-color" class="p-2 border rounded">
-						</div>
+
+						<!-- <div class="flex flex-col h-[25rem] ">
+						<h2 class="text-xl font-bold mb-4">Elements</h2>
+						<ul id="elements-list" class="space-y-2  overflow-y-scroll">
+							sakldfjasl
+						</ul>
+					</div> -->
 					</div>
-
-				</div>
-				<div>
-					<button id="add-ball" class="p-5 bg-green-500 h-full text-white rounded">
-						<i class="fa-solid fa-circle-plus fa-2xl"></i>
-					</button>
 				</div>
 			</div>
 		</div>
