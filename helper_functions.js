@@ -37,39 +37,6 @@ function addline(e) {
   render();
   // tick();
 }
-function start() {
-  console.log("starting");
-  if (!running) {
-    mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
-    running = true;
-  }
-}
-function stop_() {
-  console.log("stoping");
-  if (running) {
-    clearInterval(mainloop);
-    running = false;
-  }
-}
-function step() {
-  tick();
-}
-function demo() {
-  let ball1 = new circle_thing(500, 250, 30, "blue", [20, 0], [], true);
-  let ball2 = new circle_thing(600, 250, 40, "pink", [-20, 0], [], true);
-  let ball3 = new circle_thing(600, 250, 60, "red", [0, 0], [], true);
-  let ball4 = new circle_thing(500, 350, 20, "yellow", [-40, 5], [], true);
-  let ball5 = new circle_thing(400, 100, 25, "purple", [3, 7], [], true);
-  let ball6 = new circle_thing(250, 400, 25, "orange", [-7, 3], [], true);
-  let ball8 = new circle_thing(350, 300, 20, "cyan", [-6, 6], [], true);
-
-  let line5 = new line_thing(
-    [width / 2 - 88, height / 2 - 200],
-    [width / 2 + 200, height / 2 + 200],
-    "white"
-  );
-  start();
-}
 
 function dot(a, b) {
   return a[0] * b[0] + a[1] * b[1];

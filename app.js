@@ -4,13 +4,14 @@ let mainloop;
 let renderer = [];
 delta_t = 0.1;
 tick_rate = 10;
-let grid_dim = [30, 30];
+let grid_dim = [10, 10];
 let show_grid = false;
 // let width = window.innerWidth - 40;
 // let height = window.innerHeight - 40;
-let width = 1200;
-let height = 600;
+let width;
+let height;
 let running = false;
+let global_grid;
 
 // console.log(window.innerHeight);
 // const grid_c = require("grid.js");
@@ -19,9 +20,8 @@ let running = false;
 //   0: [],
 // };
 
-let global_grid = new grid_c();
-
 function init() {
+  console.log("here goes nothing");
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
   // canvas.width = window.innerWidth - 40;
@@ -29,9 +29,11 @@ function init() {
   width = canvas.width;
   height = canvas.height;
   console.log("sodjfl", width, height);
+  global_grid = new grid_c();
 
   ctx.translate(0, canvas.height);
   ctx.scale(1, -1);
+  add_border_lines();
   // drawbackground();
 
   // mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
@@ -87,4 +89,39 @@ function tick() {
   render();
   // console.log(global_grid);
   //   img = makeimage();
+}
+
+function start() {
+  console.log("starting");
+  if (!running) {
+    mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
+    // mainloop = setInterval(tick);
+    running = true;
+  }
+}
+function stop_() {
+  console.log("stoping");
+  if (running) {
+    clearInterval(mainloop);
+    running = false;
+  }
+}
+function step() {
+  tick();
+}
+function demo() {
+  let ball1 = new circle_thing(500, 250, 30, "blue", [20, 0], [], true);
+  let ball2 = new circle_thing(600, 250, 40, "pink", [-20, 0], [], true);
+  let ball3 = new circle_thing(600, 250, 60, "red", [0, 0], [], true);
+  let ball4 = new circle_thing(500, 350, 20, "yellow", [-40, 5], [], true);
+  let ball5 = new circle_thing(400, 100, 25, "purple", [3, 7], [], true);
+  let ball6 = new circle_thing(250, 100, 25, "orange", [7, 3], [], true);
+  let ball8 = new circle_thing(350, 300, 20, "cyan", [-6, 6], [], true);
+
+  let line5 = new line_thing(
+    [width / 2 - 48, height / 2 - 100],
+    [width / 2 + 50, height / 2 + 50],
+    "white"
+  );
+  start();
 }
