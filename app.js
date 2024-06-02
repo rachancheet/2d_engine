@@ -3,8 +3,8 @@ let ctx;
 let mainloop;
 let renderer = [];
 delta_t = 0.1;
-tick_rate = 10;
-let grid_dim = [10, 10];
+tick_rate = 60;
+let grid_dim = [20, 20];
 let show_grid = false;
 // let width = window.innerWidth - 40;
 // let height = window.innerHeight - 40;
@@ -94,7 +94,10 @@ function tick() {
 function start() {
   console.log("starting");
   if (!running) {
-    mainloop = setInterval(tick, (1 / tick_rate) * 0.001);
+    // mainloop = setInterval(async () => {
+    //   tick();
+    // }, (1 / tick_rate) * 0.001);
+    mainloop = setInterval(tick, (1 / tick_rate) * 1000);
     // mainloop = setInterval(tick);
     running = true;
   }
